@@ -4,7 +4,7 @@
             <div v-if="operation" class="calculator__small">
               {{ operation }}
             </div>
-            <input type="text" class="calculator__input" placeholder="0" v-model="expression" />
+            <input type="text" @keyup.enter="calculate()" class="calculator__input" :placeholder="result" v-model="expression" />
         </div>
         <div class="calculator__buttons">
             <span class="calculator__buttons__item" 
@@ -23,6 +23,8 @@
 import { ref } from 'vue';
 const operation = ref('');
 const expression = ref('');
+const result = ref(0);
+
 const buttons = [{ order: 17, name: '0', value: '0', type: 'operation', class: ''},
       { order: 4, name: '1', value: '1', type: 'operation', class: ''},
       { order: 5, name: '2', value: '2', type: 'operation', class: ''},
@@ -39,7 +41,7 @@ const buttons = [{ order: 17, name: '0', value: '0', type: 'operation', class: '
       { order: 15, name: '/', value: '/', type: 'operation', class: 'operation'},
       { order: 1, name: '(', value: '(', type: 'operation', class: 'operation'},
       { order: 2, name: ')', value: ')', type: 'operation', class: 'operation'},
-      { order: 18, name: '%', value: '%', type: 'operation', class: 'operation'},
+      { order: 18, name: '%', value: '%', type: 'percentage', class: 'operation'},
       { order: 19, name: '=', value: '=', type: 'calculate', class: 'operation result'},
       { order: 16, name: '.', value: '.', type: 'operation', class: 'operation'},
       { order: 0, name: 'C', value: 'C', type: 'reset', class: 'operation cancel'}];
@@ -54,6 +56,10 @@ const buttons = [{ order: 17, name: '0', value: '0', type: 'operation', class: '
           case 'reset': 
             resetValue();
             break;
+
+          case 'percentage': 
+            makePercentage();
+            break;
           
           default:
             expression.value += buttonValue;
@@ -63,13 +69,34 @@ const buttons = [{ order: 17, name: '0', value: '0', type: 'operation', class: '
 
       const calculate = () => {
         operation.value = expression.value;
-        expression.value = eval(expression.value);
+        result.value = eval(expression.value);
+        expression.value = '';
       }
 
       const resetValue = () => {
         expression.value = '';
         operation.value = '';
+        result.value = 0;
       }
+
+      const makePercentage = () => {
+        let numbersOfExpression = [];
+        const operators = ['-', '+', '*', '/'];
+
+        for(const operator in operators) {
+          if(expression.value.indexOf(operators[operator]) > 0) {
+            numbersOfExpression = expression.value.split(operators[operator]);
+            const percentageFromNumber = (numbersOfExpression[1] / 100) * numbersOfExpression[0];
+
+            operation.value = expression.value + '%';
+            result.value = eval(numbersOfExpression[0] + operators[operator] + percentageFromNumber);
+            expression.value = '';
+            break;
+          }
+        }
+        
+      }
+
 </script>
 
 <style lang="scss" scoped>
