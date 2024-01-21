@@ -1,13 +1,14 @@
 <template>
     <div class="calculator">
         <div class="calculator__header">
-            <div v-if="operation" class="calc__small">
+            <div v-if="operation" class="calculator__small">
               {{ operation }}
             </div>
-            <input type="text" class="calculator__input" placeholder="0" v-model="value" />
+            <input type="text" class="calculator__input" placeholder="0" v-model="expression" />
         </div>
         <div class="calculator__buttons">
             <span class="calculator__buttons__item" 
+                @click="startCommand(button.value, button.type)"
                 v-for="(button, index) in buttons"
                 :class="button.class"
                 :style="{order: button.order}"
@@ -19,6 +20,9 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+const operation = ref('');
+const expression = ref('');
 const buttons = [{ order: 17, name: '0', value: '0', type: 'operation', class: ''},
       { order: 4, name: '1', value: '1', type: 'operation', class: ''},
       { order: 5, name: '2', value: '2', type: 'operation', class: ''},
@@ -38,7 +42,34 @@ const buttons = [{ order: 17, name: '0', value: '0', type: 'operation', class: '
       { order: 18, name: '%', value: '%', type: 'operation', class: 'operation'},
       { order: 19, name: '=', value: '=', type: 'calculate', class: 'operation result'},
       { order: 16, name: '.', value: '.', type: 'operation', class: 'operation'},
-      { order: 0, name: 'C', value: 'C', type: 'reset', class: 'operation cancel'},];
+      { order: 0, name: 'C', value: 'C', type: 'reset', class: 'operation cancel'}];
+
+      const startCommand = (buttonValue, buttonType) => {
+
+        switch(buttonType) {
+          case 'calculate':
+            calculate();
+            break;
+          
+          case 'reset': 
+            resetValue();
+            break;
+          
+          default:
+            expression.value += buttonValue;
+        }
+        
+      }
+
+      const calculate = () => {
+        operation.value = expression.value;
+        expression.value = eval(expression.value);
+      }
+
+      const resetValue = () => {
+        expression.value = '';
+        operation.value = '';
+      }
 </script>
 
 <style lang="scss" scoped>
