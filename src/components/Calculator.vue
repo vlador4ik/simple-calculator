@@ -5,6 +5,7 @@
               {{ operation }}
             </div>
             <input type="text" @keyup.enter="calculate()" class="calculator__input" :placeholder="result" v-model="expression" />
+            <span class="calculator__error" v-if="errorMessage"> {{ errorMessage }} </span>
         </div>
         <div class="calculator__buttons">
             <span class="calculator__buttons__item" 
@@ -24,6 +25,7 @@ import { ref } from 'vue';
 const operation = ref('');
 const expression = ref('');
 const result = ref(0);
+const errorMessage = ref(false);
 
 const buttons = [{ order: 17, name: '0', value: '0', type: 'operation', class: ''},
       { order: 4, name: '1', value: '1', type: 'operation', class: ''},
@@ -69,14 +71,20 @@ const buttons = [{ order: 17, name: '0', value: '0', type: 'operation', class: '
 
       const calculate = () => {
         operation.value = expression.value;
-        result.value = eval(expression.value);
-        expression.value = '';
+        try {
+          result.value = eval(expression.value);
+          expression.value = '';
+        } catch(error) {
+          errorMessage.value = "Please write only numbers to input";
+        }
+        
       }
 
       const resetValue = () => {
         expression.value = '';
         operation.value = '';
         result.value = 0;
+        errorMessage.value = false;
       }
 
       const makePercentage = () => {
@@ -116,7 +124,11 @@ body {
 
     &__header {
         border-radius: 3px;
-        padding: 30px 40px;
+        min-height: 75px;
+        display: flex;
+        justify-content: flex-end;
+        flex-direction: column;
+        padding: 20px 30px;
         position: relative;
         border-bottom: 1px solid #1a72a7;
       }
@@ -142,6 +154,13 @@ body {
         text-align: right;
         color: #a0abb2;
         font-size: 13px;
+      }
+
+      &__error {
+        font-size: 13px;
+        color: red;
+        text-align: right;
+        display: block;
       }
       
       &__buttons {
